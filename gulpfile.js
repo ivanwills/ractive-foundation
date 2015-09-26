@@ -1,5 +1,12 @@
 var gulp = require('gulp'),
-	args = require('yargs').argv,
+	option = require('node-getopt-long').options([
+		['component|c=s@', 'Specify which components tests will be run, can be specified more than once'],
+		['name|n=s', 'dummy'],
+		['tag|t=s@', 'Only run tests with this tag']
+	], {
+		name: 'gulp ' + (process.argv[2].match(/^-/) ? '' : process.argv[2]),
+		helpSuffix: 'For more information on running ractive-foundation gulp tasks please read the README.md\n'
+	}),
 	del = require('del'),
 	glob = require('simple-glob'),
 	exec = require('child_process').exec,
@@ -8,7 +15,6 @@ var gulp = require('gulp'),
 	mergeStream = require('merge-stream'),
 	fs = require('fs'),
 	nodePath = require('path'),
-	_ = require('lodash-compat'),
 
 	plugins = require('gulp-load-plugins')(),
 
@@ -298,13 +304,16 @@ gulp.task('test', ['version-check', 'build'], function (callback) {
 
 	var globFeature = [];
 
-	if (args.component) {
+	if (option.component) {
 
-		var componentName = args.component || '';
+		var paths = [];
+		for (var component in option.component) {
+			if (option.component.hasOwnProperty(component)) {
+				var componentName = option.component[component];
 
-		var paths = [
-			'./src/components/%s/*.feature'.replace('%s', componentName)
-		];
+				paths.push('./src/components/%s/*.feature'.replace('%s', componentName));
+			}
+		}
 
 		globFeature = glob(paths);
 
@@ -329,7 +338,10 @@ gulp.task('test', ['version-check', 'build'], function (callback) {
 	selServer.init().then(function () {
 		var stream = gulp.src(globFeature)
 			.pipe(rfCucumber(
-				{ steps: globStep }
+				{
+					steps: globStep,
+					tags: option.tags
+				}
 			));
 
 		stream.on('end', function () {
