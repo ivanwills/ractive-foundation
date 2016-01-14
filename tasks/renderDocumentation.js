@@ -236,6 +236,11 @@ function getComponentFile (manifest, docFile, sideNavDataModel, file, partials, 
  */
 function renderDocumentation(options) {
 
+	if (!options.type) {
+		console.warn('No documentation type passed, assuming "component"');
+		options.type = 'components';
+	}
+
 	var stream = through.obj(function (file, enc, callback) {
 
 		if (file.isStream()) {
