@@ -237,7 +237,7 @@ function getComponentFile (manifest, docFile, sideNavDataModel, file, partials, 
 function renderDocumentation(options) {
 
 	if (!options.type) {
-		console.warn('No documentation type passed, assuming "component"');
+		console.warn('No documentation type passed, assuming "components"');
 		options.type = 'components';
 	}
 
